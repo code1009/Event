@@ -120,6 +120,7 @@ namespace ev::key
 	}
 	void EventDispatcher::dispatchEvent(EventType const eventType, Event& event)
 	{
+		// 큐형태로 처리 가능 함
 		auto eventListener = getEventListener(eventType);
 		if (eventListener)
 		{

@@ -70,14 +70,15 @@ namespace ev::target
 
 /////////////////////////////////////////////////////////////////////////////
 //===========================================================================
-namespace app
-{
-	class Object;
-}
+//namespace app
+//{
+//	class Object;
+//}
 
 namespace ev::target
 {
-	using EventTarget = std::shared_ptr<app::Object>;
+	//using EventTarget = std::shared_ptr<app::Object>;
+	using EventTarget = std::shared_ptr<void>;
 }
 
 /////////////////////////////////////////////////////////////////////////////

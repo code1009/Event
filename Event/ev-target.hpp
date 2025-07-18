@@ -154,7 +154,7 @@ namespace ev::target
 
 	public:
 		void notifyEvent(EventId const& eventId, Event& event);
-		void notifyEvent(EventTarget const eventTarget, EventType const eventType, std::shared_ptr<EventData> eventData);
+		void notifyEvent(EventType const eventType, EventTarget const eventTarget, std::shared_ptr<EventData> eventData);
 	};
 
 	void EventDispatcher::registerEventListener(EventId const eventId, std::shared_ptr<EventListener> eventListener)
@@ -186,7 +186,7 @@ namespace ev::target
 	{
 		dispatchEvent(eventId, event);
 	}
-	void EventDispatcher::notifyEvent(EventTarget const eventTarget, EventType const eventType, std::shared_ptr<EventData> eventData)
+	void EventDispatcher::notifyEvent(EventType const eventType, EventTarget const eventTarget, std::shared_ptr<EventData> eventData)
 	{
 		EventId eventId{ eventType, eventTarget };
 		Event event{ eventType, eventData };
@@ -208,8 +208,8 @@ namespace ev::target
 		explicit EventHandlerRegistry(EventDispatcher& eventDispatcher);
 
 		void registerEventHandler(
-			EventTarget const& eventTarget,
 			EventType const eventType,
+			EventTarget const& eventTarget,
 			EventHandler const& eventHandler);
 
 		void unregisterEventHandler(EventTarget const& eventTarget);
@@ -220,8 +220,8 @@ namespace ev::target
 	{
 	}
 	void EventHandlerRegistry::registerEventHandler(
-		EventTarget const& eventTarget,
 		EventType const eventType,
+		EventTarget const& eventTarget,
 		EventHandler const& eventHandler)
 	{
 		EventId eventId{ eventType, eventTarget };

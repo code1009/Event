@@ -92,7 +92,7 @@ namespace ev::key
 	}
 	void EventDispatcher::unregisterEventHandler(Key const key)
 	{
-		std::vector<EventType> removeEventTypes;
+		std::vector<EventType> eventTypes;
 		for (auto& [eventType, eventListener] : _EventListenerMap)
 		{
 			if (eventListener)
@@ -100,11 +100,11 @@ namespace ev::key
 				eventListener->detach(key);
 				if (eventListener->empty())
 				{
-					removeEventTypes.push_back(eventType);
+					eventTypes.push_back(eventType);
 				}
 			}
 		}
-		for (const auto& eventType : removeEventTypes)
+		for (const auto& eventType : eventTypes)
 		{
 			_EventListenerMap.erase(eventType);
 		}

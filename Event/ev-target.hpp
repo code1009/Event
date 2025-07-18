@@ -202,16 +202,17 @@ namespace ev::target
 	{
 	private:
 		EventDispatcher& _EventDispatcher;
-		std::map<EventId, EventListener::Token> _EventTokenMap;
+		std::vector<std::pair<EventId, EventListener::Token>> _EventTokens;
 
 	public:
 		explicit EventHandlerRegistry(EventDispatcher& eventDispatcher);
 
+	public:
 		void registerEventHandler(
 			EventType const eventType,
 			EventTarget const& eventTarget,
-			EventHandler const& eventHandler);
-
+			EventHandler const& eventHandler
+		);
 		void unregisterEventHandler(EventTarget const& eventTarget);
 	};
 
@@ -222,7 +223,8 @@ namespace ev::target
 	void EventHandlerRegistry::registerEventHandler(
 		EventType const eventType,
 		EventTarget const& eventTarget,
-		EventHandler const& eventHandler)
+		EventHandler const& eventHandler
+	)
 	{
 		EventId eventId{ eventType, eventTarget };
 
@@ -234,12 +236,12 @@ namespace ev::target
 		}
 
 		auto token = eventListener->attach(eventHandler);
-		_EventTokenMap[eventId] = token;
+		_EventTokens.push_back({ eventId, token });
 	}
 	void EventHandlerRegistry::unregisterEventHandler(EventTarget const& eventTarget)
 	{
-		std::vector<EventId> eventIds;
-		for (auto& [eventId, token] : _EventTokenMap)
+		std::vector<std::pair<EventId, EventListener::Token>> eventTokens;
+		for (auto& [eventId, token] : _EventTokens)
 		{
 			if (eventId.eventTarget() == eventTarget)
 			{
@@ -252,12 +254,16 @@ namespace ev::target
 						_EventDispatcher.unregisterEventListener(eventId);
 					}
 				}
-				eventIds.push_back(eventId);
+				eventTokens.push_back({ eventId, token });
 			}
 		}
-		for (const auto& eventId : eventIds)
+		for (const auto& eventToken : eventTokens)
 		{
-			_EventTokenMap.erase(eventId);
+			auto it = std::find(_EventTokens.begin(), _EventTokens.end(), eventToken);
+			if (it != _EventTokens.end())
+			{
+				_EventTokens.erase(it);
+			}
 		}
 	}
 }

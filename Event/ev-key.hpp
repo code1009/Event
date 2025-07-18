@@ -150,11 +150,12 @@ namespace ev::key
 	public:
 		explicit EventHandlerRegistry(EventDispatcher& eventDispatcher);
 
+	public:
 		void registerEventHandler(
 			EventType const eventType,
 			Key const key,
-			EventHandler const& eventHandler);
-
+			EventHandler const& eventHandler
+		);
 		void unregisterEventHandler(Key const key);
 	};
 
@@ -165,7 +166,8 @@ namespace ev::key
 	void EventHandlerRegistry::registerEventHandler(
 		EventType const eventType,
 		Key const key,
-		EventHandler const& eventHandler)
+		EventHandler const& eventHandler
+	)
 	{
 		auto eventListener = _EventDispatcher.getEventListener(eventType);
 		if (!eventListener)

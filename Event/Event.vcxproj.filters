@@ -23,6 +23,9 @@
     <ClInclude Include="ev-key.hpp">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="ev-target.hpp">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
     <ClInclude Include="ev.hpp">
       <Filter>헤더 파일</Filter>
     </ClInclude>

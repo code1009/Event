@@ -22,8 +22,9 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ev.hpp" />
+    <ClInclude Include="ev-target.hpp" />
     <ClInclude Include="ev-key.hpp" />
+    <ClInclude Include="ev.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

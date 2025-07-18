@@ -32,34 +32,54 @@ namespace Test
 	class Event
 	{
 	private:
-		bool _Handled{ false };
+		bool _Handled;
 		EventType _EventType;
 		std::shared_ptr<EventData> _EventData;
 
 	public:
-		explicit Event(EventType const& eventType, std::shared_ptr<EventData>& eventData) :
-			_EventType(eventType),
-			_EventData(eventData)
-		{
-		}
+		explicit Event(EventType const& eventType, std::shared_ptr<EventData>& eventData);
 
 	public:
 		virtual ~Event() = default;
 
 	public:
-		EventType eventType() const { return _EventType; }
-		std::shared_ptr<EventData> eventData() const { return _EventData; }
-
-		template<typename T> 
-		std::shared_ptr<T> eventDataAs() const
-		{
-			return std::dynamic_pointer_cast<T>(_EventData);
-		}
+		EventType eventType() const;
+		std::shared_ptr<EventData> eventData() const;
+		template<typename T> std::shared_ptr<T> eventDataAs() const;
 
 	public:
-		bool handled() const { return _Handled; }
-		void handled(bool const handled) { _Handled = handled; }
+		bool handled() const;
+		void handled(bool const handled);
 	};
+
+	template<typename T>
+	std::shared_ptr<T> Event::eventDataAs() const
+	{
+		return std::dynamic_pointer_cast<T>(_EventData);
+	}
+
+	Event::Event(EventType const& eventType, std::shared_ptr<EventData>& eventData) :
+		_Handled(false), 
+		_EventType(eventType), 
+		_EventData(eventData)
+	{
+	}
+	EventType Event::eventType() const
+	{
+		return _EventType;
+	}
+	std::shared_ptr<EventData> Event::eventData() const
+	{
+		return _EventData;
+	}
+	bool Event::handled() const
+	{
+		return _Handled;
+	}
+	void Event::handled(bool const handled)
+	{
+		_Handled = handled;
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -76,50 +96,57 @@ namespace Test
 	class EventListener
 	{
 	public:
-		using Token = std::uint64_t;
+		using Token = std::uint32_t;
 
 	private:
-		Token _CurrentToken{ 0 };
+		Token _CurrentToken;
 		std::unordered_map<Token, EventHandler> _EventHandlers;
 
 	public:
-		Token attach(EventHandler const& handler)
-		{
-			_CurrentToken++;
-			_EventHandlers[_CurrentToken] = handler;
-			return _CurrentToken;
-		}
-		void detach(Token const token)
-		{
-			_EventHandlers.erase(token);
-		}
+		EventListener();
 
-	public:
-		void clear()
-		{
-			_EventHandlers.clear();
-			_CurrentToken = 0;
-		}
+		Token attach(EventHandler const& handler);
+		void detach(Token const token);
 
-	public:
-		bool empty() const
-		{
-			return _EventHandlers.empty();
-		}
+		void clear();
+		bool empty() const;
+		void notify(Event& event);
+	};
 
-	public:
-		void notify(Event& event)
+	EventListener::EventListener()
+		: _CurrentToken(0)
+	{
+	}
+	EventListener::Token EventListener::attach(EventHandler const& handler)
+	{
+		_CurrentToken++;
+		_EventHandlers[_CurrentToken] = handler;
+		return _CurrentToken;
+	}
+	void EventListener::detach(Token const token)
+	{
+		_EventHandlers.erase(token);
+	}
+	void EventListener::clear()
+	{
+		_EventHandlers.clear();
+		_CurrentToken = 0;
+	}
+	bool EventListener::empty() const
+	{
+		return _EventHandlers.empty();
+	}
+	void EventListener::notify(Event& event)
+	{
+		for (const auto& [token, eventHandler] : _EventHandlers)
 		{
-			for (const auto& [token, eventHandler] : _EventHandlers)
+			eventHandler(event);
+			if (event.handled())
 			{
-				eventHandler(event);
-				if (event.handled())
-				{
-					break;
-				}
+				break;
 			}
 		}
-	};
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -141,32 +168,35 @@ namespace Test
 		EventTarget _EventTarget;
 
 	public:
-		EventId(EventType const eventType, EventTarget const& eventTarget) :
-				_EventType(eventType),
-				_EventTarget(eventTarget)
-		{
-		}
+		EventId(EventType const eventType, EventTarget const& eventTarget);
 
 	public:
-		EventType eventType() const { return _EventType; }
-		EventTarget eventTarget() const { return _EventTarget; }
+		EventType const eventType() const;
+		EventTarget const eventTarget() const;
 	};
-}
 
-/////////////////////////////////////////////////////////////////////////////
-//===========================================================================
-namespace Test
-{
+	EventId::EventId(EventType const eventType, EventTarget const& eventTarget) :
+		_EventType(eventType), 
+		_EventTarget(eventTarget)
+	{
+	}
+	EventType const EventId::eventType() const
+	{
+		return _EventType;
+	}
+	EventTarget const EventId::eventTarget() const
+	{
+		return _EventTarget;
+	}
+
 	inline bool operator==(EventId const& lhs, EventId const& rhs)
 	{
 		return (lhs.eventType() == rhs.eventType() && lhs.eventTarget() == rhs.eventTarget());
 	}
-
 	inline bool operator!=(EventId const& lhs, EventId const& rhs)
 	{
 		return !(lhs == rhs);
 	}
-
 	inline bool operator<(EventId const& lhs, EventId const& rhs)
 	{
 		if (lhs.eventType() < rhs.eventType())
@@ -193,47 +223,53 @@ namespace Test
 		std::map<EventId, std::shared_ptr<EventListener>> _EventListenerMap;
 
 	public:
-		void registerEventListener(EventId const eventId, std::shared_ptr<EventListener> listener)
-		{
-			_EventListenerMap[eventId] = listener;
-		}
-		void unregisterEventListener(EventId const eventId)
-		{
-			_EventListenerMap.erase(eventId);
-		}
-		std::shared_ptr<EventListener> getEventListener(EventId const eventId)
-		{
-			auto it = _EventListenerMap.find(eventId);
-			if (it != _EventListenerMap.end())
-			{
-				return it->second;
-			}
-			return nullptr;
-		}
+		void registerEventListener(EventId const eventId, std::shared_ptr<EventListener> listener);
+		void unregisterEventListener(EventId const eventId);
+		std::shared_ptr<EventListener> getEventListener(EventId const eventId);
 
 	protected:
-		void dispatchEvent(EventId const& eventId, Event& event)
-		{
-			auto eventListener = getEventListener(eventId);
-			if (eventListener)
-			{
-				eventListener->notify(event);
-			}
-		}
+		void dispatchEvent(EventId const& eventId, Event& event);
 
 	public:
-		void notifyEvent(EventId const& eventId, Event& event)
-		{
-			dispatchEvent(eventId, event);
-		}
-
-		void notifyEvent(EventTarget const eventTarget, EventType const eventType, std::shared_ptr<EventData> eventData)
-		{
-			EventId eventId{ eventType, eventTarget };
-			Event event{ eventType, eventData };
-			notifyEvent(eventId, event);
-		}
+		void notifyEvent(EventId const& eventId, Event& event);
+		void notifyEvent(EventTarget const eventTarget, EventType const eventType, std::shared_ptr<EventData> eventData);
 	};
+
+	void EventDispatcher::registerEventListener(EventId const eventId, std::shared_ptr<EventListener> listener)
+	{
+		_EventListenerMap[eventId] = listener;
+	}
+	void EventDispatcher::unregisterEventListener(EventId const eventId)
+	{
+		_EventListenerMap.erase(eventId);
+	}
+	std::shared_ptr<EventListener> EventDispatcher::getEventListener(EventId const eventId)
+	{
+		auto it = _EventListenerMap.find(eventId);
+		if (it != _EventListenerMap.end())
+		{
+			return it->second;
+		}
+		return nullptr;
+	}
+	void EventDispatcher::dispatchEvent(EventId const& eventId, Event& event)
+	{
+		auto eventListener = getEventListener(eventId);
+		if (eventListener)
+		{
+			eventListener->notify(event);
+		}
+	}
+	void EventDispatcher::notifyEvent(EventId const& eventId, Event& event)
+	{
+		dispatchEvent(eventId, event);
+	}
+	void EventDispatcher::notifyEvent(EventTarget const eventTarget, EventType const eventType, std::shared_ptr<EventData> eventData)
+	{
+		EventId eventId{ eventType, eventTarget };
+		Event event{ eventType, eventData };
+		notifyEvent(eventId, event);
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -247,58 +283,66 @@ namespace Test
 		std::map<EventId, EventListener::Token> _EventTokenMap;
 
 	public:
-		explicit EventHandlerRegistry(EventDispatcher& eventDispatcher) :
-			_EventDispatcher(eventDispatcher)
-		{
-		}
+		explicit EventHandlerRegistry(EventDispatcher& eventDispatcher);
 
-	public:
 		void registerEventHandler(
-			EventType const eventType, 
-			EventTarget const& target, 
-			EventHandler const& handler)
-		{
-			EventId eventId{ eventType, target };
+			EventType const eventType,
+			EventTarget const& target,
+			EventHandler const& handler);
 
-
-			auto listener = _EventDispatcher.getEventListener(eventId);
-			if (!listener)
-			{
-				listener = std::make_shared<EventListener>();
-				_EventDispatcher.registerEventListener(eventId, listener);
-			}
-
-
-			auto token = listener->attach(handler);
-			_EventTokenMap[eventId] = token;
-		}
-
-		void unregisterTarget(EventTarget const& target)
-		{
-			std::vector<EventId> removeEventIds;
-			for(auto& [eventId, token] : _EventTokenMap)
-			{
-				if (eventId._EventTarget == target)
-				{
-					auto listener = _EventDispatcher.getEventListener(eventId);
-					if (listener)
-					{
-						listener->detach(token);
-						if (listener->empty())
-						{
-							_EventDispatcher.unregisterEventListener(eventId);
-						}
-					}
-					removeEventIds.push_back(eventId);
-				}
-			}
-			for (const auto& eventId : removeEventIds)
-			{
-				_EventTokenMap.erase(eventId);
-			}
-		}
+		void unregisterTarget(EventTarget const& target);
 	};
+
+	EventHandlerRegistry::EventHandlerRegistry(EventDispatcher & eventDispatcher)
+		: _EventDispatcher(eventDispatcher)
+	{
+	}
+	void EventHandlerRegistry::registerEventHandler(
+		EventType const eventType,
+		EventTarget const& target,
+		EventHandler const& handler)
+	{
+		EventId eventId{ eventType, target };
+
+		auto listener = _EventDispatcher.getEventListener(eventId);
+		if (!listener)
+		{
+			listener = std::make_shared<EventListener>();
+			_EventDispatcher.registerEventListener(eventId, listener);
+		}
+
+		auto token = listener->attach(handler);
+		_EventTokenMap[eventId] = token;
+	}
+	void EventHandlerRegistry::unregisterTarget(EventTarget const& target)
+	{
+		std::vector<EventId> removeEventIds;
+		for (auto& [eventId, token] : _EventTokenMap)
+		{
+			if (eventId.eventTarget() == target)
+			{
+				auto listener = _EventDispatcher.getEventListener(eventId);
+				if (listener)
+				{
+					listener->detach(token);
+					if (listener->empty())
+					{
+						_EventDispatcher.unregisterEventListener(eventId);
+					}
+				}
+				removeEventIds.push_back(eventId);
+			}
+		}
+		for (const auto& eventId : removeEventIds)
+		{
+			_EventTokenMap.erase(eventId);
+		}
+	}
 }
+
+
+
+
 
 /////////////////////////////////////////////////////////////////////////////
 //===========================================================================

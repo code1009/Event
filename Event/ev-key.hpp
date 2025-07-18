@@ -2,7 +2,8 @@
 //===========================================================================
 namespace ev::key
 {
-	using Key = void*;
+//	using Key = void*;
+	using Key = std::uintptr_t;
 }
 
 namespace ev::key

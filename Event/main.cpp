@@ -158,19 +158,19 @@ void test2(void)
 	ev::key::EventListener eventListener;
 
 	eventListener.attach(
-		object1.get(),
+		reinterpret_cast<std::uintptr_t>(object1.get()),
 		std::bind(&app::Object::eventHandler_A, object1, std::placeholders::_1)
 	);
 	eventListener.attach(
-		object1.get(), // &app::Object::eventHandler_A 덮어 씀. 주의 할 것!
+		reinterpret_cast<std::uintptr_t>(object1.get()), // &app::Object::eventHandler_A 덮어 씀. 주의 할 것!
 		std::bind(&app::Object::eventHandler_B, object1, std::placeholders::_1)
 	);
 	eventListener.attach(
-		object2.get(),
+		reinterpret_cast<std::uintptr_t>(object2.get()),
 		std::bind(&app::Object::eventHandler_A, object2, std::placeholders::_1)
 	);
 	eventListener.attach(
-		object2.get(), // &app::Object::eventHandler_A 덮어 씀. 주의 할 것!
+		reinterpret_cast<std::uintptr_t>(object2.get()), // &app::Object::eventHandler_A 덮어 씀. 주의 할 것!
 		std::bind(&app::Object::eventHandler_B, object2, std::placeholders::_1)
 	);
 
@@ -179,7 +179,7 @@ void test2(void)
 	eventListener.notify(event_A);
 	eventListener.notify(EventType_B, std::make_shared<app::ObjectEventData>(102));
 
-	eventListener.detach(object1.get());
+	eventListener.detach(reinterpret_cast<std::uintptr_t>(object1.get()));
 
 	eventListener.notify(EventType_A, std::make_shared<app::ObjectEventData>(103));
 	eventListener.notify(EventType_B, std::make_shared<app::ObjectEventData>(104));
@@ -202,28 +202,28 @@ void test3(void)
 
 	eventHandlerRegistry.registerEventHandler(
 		EventType_A,
-		object1.get(),
+		reinterpret_cast<std::uintptr_t>(object1.get()),
 		std::bind(&app::Object::eventHandler_A, object1, std::placeholders::_1)
 	);
 	eventHandlerRegistry.registerEventHandler(
 		EventType_B,
-		object1.get(),
+		reinterpret_cast<std::uintptr_t>(object1.get()),
 		std::bind(&app::Object::eventHandler_B, object1, std::placeholders::_1)
 	);
 
 	eventHandlerRegistry.registerEventHandler(
 		EventType_A,
-		object2.get(),
+		reinterpret_cast<std::uintptr_t>(object2.get()),
 		std::bind(&app::Object::eventHandler_A, object2, std::placeholders::_1)
 	);
 	eventHandlerRegistry.registerEventHandler(
 		EventType_B,
-		object2.get(),
+		reinterpret_cast<std::uintptr_t>(object2.get()),
 		std::bind(&app::Object::eventHandler_B, object2, std::placeholders::_1)
 	);
 	eventHandlerRegistry.registerEventHandler(
 		EventType_C,
-		object2.get(),
+		reinterpret_cast<std::uintptr_t>(object2.get()),
 		std::bind(&app::Object::eventHandler_C, object2, std::placeholders::_1)
 	);
 
@@ -233,7 +233,7 @@ void test3(void)
 	eventDispatcher.notifyEvent(EventType_B, std::make_shared<app::ObjectEventData>(104));
 
 
-	eventHandlerRegistry.unregisterEventHandler(object1.get());
+	eventHandlerRegistry.unregisterEventHandler(reinterpret_cast<std::uintptr_t>(object1.get()));
 
 
 	eventDispatcher.notifyEvent(EventType_B, std::make_shared<app::ObjectEventData>(105));

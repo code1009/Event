@@ -32,12 +32,12 @@ namespace Test
 	class Event
 	{
 	private:
-		bool _Handled;
 		EventType _EventType;
 		std::shared_ptr<EventData> _EventData;
+		bool _Handled{ false };
 
 	public:
-		explicit Event(EventType const& eventType, std::shared_ptr<EventData>& eventData);
+		explicit Event(EventType const eventType, std::shared_ptr<EventData>& eventData);
 
 	public:
 		virtual ~Event() = default;
@@ -58,7 +58,7 @@ namespace Test
 		return std::dynamic_pointer_cast<T>(_EventData);
 	}
 
-	Event::Event(EventType const& eventType, std::shared_ptr<EventData>& eventData) :
+	Event::Event(EventType const eventType, std::shared_ptr<EventData>& eventData) :
 		_Handled(false), 
 		_EventType(eventType), 
 		_EventData(eventData)
@@ -105,12 +105,17 @@ namespace Test
 	public:
 		EventListener();
 
+	public:
 		Token attach(EventHandler const& handler);
 		void detach(Token const token);
 
+	public:
 		void clear();
 		bool empty() const;
+
+	public:
 		void notify(Event& event);
+		void notify(EventType const eventType, std::shared_ptr<EventData> eventData);
 	};
 
 	EventListener::EventListener()
@@ -147,6 +152,11 @@ namespace Test
 			}
 		}
 	}
+	void EventListener::notify(EventType const eventType, std::shared_ptr<EventData> eventData)
+	{
+		Event event{ eventType, eventData };
+		notify(event);
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -155,6 +165,62 @@ namespace Test
 {
 	class Object;
 	using EventTarget = std::shared_ptr<Object>;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//===========================================================================
+namespace Test
+{
+	class EventTargetListener
+	{
+	private:
+		std::unordered_map<EventTarget, EventHandler> _EventHandlers;
+
+	public:
+		void attach(EventTarget const& eventTarget, EventHandler const& handler);
+		void detach(EventTarget const& eventTarget);
+
+	public:
+		void clear();
+		bool empty() const;
+
+	public:
+		void notify(Event& event);
+		void notify(EventType const eventType, std::shared_ptr<EventData> eventData);
+	};
+
+	void EventTargetListener::attach(EventTarget const& eventTarget, EventHandler const& handler)
+	{
+		_EventHandlers[eventTarget] = handler;
+	}
+	void EventTargetListener::detach(EventTarget const& eventTarget)
+	{
+		_EventHandlers.erase(eventTarget);
+	}
+	void EventTargetListener::clear()
+	{
+		_EventHandlers.clear();
+	}
+	bool EventTargetListener::empty() const
+	{
+		return _EventHandlers.empty();
+	}
+	void EventTargetListener::notify(Event& event)
+	{
+		for (const auto& [eventTarget, eventHandler] : _EventHandlers)
+		{
+			eventHandler(event);
+			if (event.handled())
+			{
+				break;
+			}
+		}
+	}
+	void EventTargetListener::notify(EventType const eventType, std::shared_ptr<EventData> eventData)
+	{
+		Event event{ eventType, eventData };
+		notify(event);
+	}
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -203,12 +269,10 @@ namespace Test
 		{
 			return true;
 		}
-
 		if (lhs.eventType() > rhs.eventType())
 		{
 			return false;
 		}
-
 		return lhs.eventTarget() < rhs.eventTarget();
 	}
 }
@@ -387,7 +451,7 @@ namespace Test
 				<< std::endl
 				;
 
-			event.handled(true);
+			//event.handled(true);
 		}
 
 		void eventHandler_B(Event& event)
@@ -400,14 +464,14 @@ namespace Test
 				<< std::endl
 				;
 
-			event.handled(true);
+			//event.handled(true);
 		}
 	};
 }
 
 /////////////////////////////////////////////////////////////////////////////
 //===========================================================================
-int main()
+void test1(void)
 {
 	using namespace Test;
 
@@ -454,6 +518,75 @@ int main()
 
 	eventDispatcher.notifyEvent(object1, EventType_B, std::make_shared<ObjectEventData>(105));
 	eventDispatcher.notifyEvent(object2, EventType_B, std::make_shared<ObjectEventData>(106));
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//===========================================================================
+void test2(void)
+{
+	using namespace Test;
+
+	const EventType EventType_A = 1;
+	const EventType EventType_B = 2;
+
+	std::shared_ptr<Object> object1 = std::make_shared<Object>(3);
+	std::shared_ptr<Object> object2 = std::make_shared<Object>(4);
+
+	EventTargetListener eventTargetListener;
+
+	eventTargetListener.attach(
+		object1,
+		std::bind(&Object::eventHandler_A, object1, std::placeholders::_1)
+	);
+	eventTargetListener.attach(
+		object1,
+		std::bind(&Object::eventHandler_B, object1, std::placeholders::_1)
+	);
+	eventTargetListener.attach(
+		object2,
+		std::bind(&Object::eventHandler_A, object2, std::placeholders::_1)
+	);
+	eventTargetListener.attach(
+		object2,
+		std::bind(&Object::eventHandler_B, object2, std::placeholders::_1)
+	);
+
+	std::shared_ptr<EventData> eventData = std::make_shared<ObjectEventData>(211);
+	Event event_A{ EventType_A, eventData };
+	eventTargetListener.notify(event_A);
+
+	eventTargetListener.notify(EventType_B, std::make_shared<ObjectEventData>(212));
+
+	eventTargetListener.detach(object1);
+	eventTargetListener.notify(EventType_A, std::make_shared<ObjectEventData>(213));
+	eventTargetListener.notify(EventType_B, std::make_shared<ObjectEventData>(214));
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//===========================================================================
+int main()
+{
+	std::cout
+		<< "-----------------------------------------------------------------"
+		<< std::endl
+		;
+	test1();
+	std::cout
+		<< std::endl
+		<< std::endl
+		<< std::endl
+		;
+
+	std::cout
+		<< "-----------------------------------------------------------------"
+		<< std::endl
+		;
+	test2();
+	std::cout
+		<< std::endl
+		<< std::endl
+		<< std::endl
+		;
 
 	return 0;
 }

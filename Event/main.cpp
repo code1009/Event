@@ -70,7 +70,7 @@ namespace app
 				<< std::endl
 				;
 
-			//event.handled(true);
+			event.handled(true);
 		}
 
 		void eventHandler_C(ev::Event& event)
@@ -152,8 +152,8 @@ void test2(void)
 	const ev::EventType EventType_A = 1;
 	const ev::EventType EventType_B = 2;
 
-	std::shared_ptr<app::Object> object1 = std::make_shared<app::Object>(3);
-	std::shared_ptr<app::Object> object2 = std::make_shared<app::Object>(4);
+	std::shared_ptr<app::Object> object1 = std::make_shared<app::Object>(1);
+	std::shared_ptr<app::Object> object2 = std::make_shared<app::Object>(2);
 
 	ev::key::EventListener eventListener;
 
@@ -174,15 +174,15 @@ void test2(void)
 		std::bind(&app::Object::eventHandler_B, object2, std::placeholders::_1)
 	);
 
-	std::shared_ptr<ev::EventData> eventData = std::make_shared<app::ObjectEventData>(211);
+	std::shared_ptr<ev::EventData> eventData = std::make_shared<app::ObjectEventData>(101);
 	ev::Event event_A{ EventType_A, eventData };
 	eventListener.notify(event_A);
 
-	eventListener.notify(EventType_B, std::make_shared<app::ObjectEventData>(212));
+	eventListener.notify(EventType_B, std::make_shared<app::ObjectEventData>(102));
 
 	eventListener.detach(object1.get());
-	eventListener.notify(EventType_A, std::make_shared<app::ObjectEventData>(213));
-	eventListener.notify(EventType_B, std::make_shared<app::ObjectEventData>(214));
+	eventListener.notify(EventType_A, std::make_shared<app::ObjectEventData>(103));
+	eventListener.notify(EventType_B, std::make_shared<app::ObjectEventData>(104));
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -283,5 +283,13 @@ int main()
 		<< std::endl
 		;
 
+
+
+	std::cout
+		<< "-----------------------------------------------------------------"
+		<< std::endl
+		<< "End"
+		<< std::endl
+		;
 	return 0;
 }

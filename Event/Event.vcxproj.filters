@@ -20,10 +20,10 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="evt-keyed.hpp">
+    <ClInclude Include="ev-key.hpp">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="evt.hpp">
+    <ClInclude Include="ev.hpp">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

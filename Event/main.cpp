@@ -9,14 +9,14 @@
 
 /////////////////////////////////////////////////////////////////////////////
 //===========================================================================
-namespace evt
+namespace ev
 {
 	using EventType = std::int32_t;
 }
 
 /////////////////////////////////////////////////////////////////////////////
 //===========================================================================
-namespace evt
+namespace ev
 {
 	class EventData : public std::enable_shared_from_this<EventData>
 	{
@@ -27,7 +27,7 @@ namespace evt
 
 /////////////////////////////////////////////////////////////////////////////
 //===========================================================================
-namespace evt
+namespace ev
 {
 	class Event
 	{
@@ -84,7 +84,7 @@ namespace evt
 
 /////////////////////////////////////////////////////////////////////////////
 //===========================================================================
-namespace evt
+namespace ev
 {
 	using EventHandler = std::function<void(Event&)>;
 }
@@ -93,15 +93,15 @@ namespace evt
 
 /////////////////////////////////////////////////////////////////////////////
 //===========================================================================
-#include "evt.hpp"
-#include "evt-keyed.hpp"
+#include "ev.hpp"
+#include "ev-key.hpp"
 
 
 /////////////////////////////////////////////////////////////////////////////
 //===========================================================================
-namespace evt
+namespace ev
 {
-	class ObjectEventData : public evt::EventData
+	class ObjectEventData : public ev::EventData
 	{
 	public:
 		int value;
@@ -115,7 +115,7 @@ namespace evt
 
 /////////////////////////////////////////////////////////////////////////////
 //===========================================================================
-namespace evt
+namespace ev
 {
 	class Object : public std::enable_shared_from_this<Object>
 	{
@@ -130,7 +130,7 @@ namespace evt
 	public:
 		virtual ~Object() = default;
 
-		void eventHandler_A(evt::Event& event)
+		void eventHandler_A(ev::Event& event)
 		{
 			std::cout
 				<< std::format("[{}] ", _Id)
@@ -143,7 +143,7 @@ namespace evt
 			//event.handled(true);
 		}
 
-		void eventHandler_B(evt::Event& event)
+		void eventHandler_B(ev::Event& event)
 		{
 			std::cout
 				<< std::format("[{}] ", _Id)
@@ -156,7 +156,7 @@ namespace evt
 			//event.handled(true);
 		}
 
-		void eventHandler_C(evt::Event& event)
+		void eventHandler_C(ev::Event& event)
 		{
 			std::cout
 				<< std::format("[{}] ", _Id)
@@ -175,154 +175,154 @@ namespace evt
 //===========================================================================
 void test1(void)
 {
-	const evt::EventType EventType_A = 1;
-	const evt::EventType EventType_B = 2;
-	const evt::EventType EventType_C = 3;
+	const ev::EventType EventType_A = 1;
+	const ev::EventType EventType_B = 2;
+	const ev::EventType EventType_C = 3;
 
-	std::shared_ptr<evt::Object> object1 = std::make_shared<evt::Object>(1);
-	std::shared_ptr<evt::Object> object2 = std::make_shared<evt::Object>(2);
+	std::shared_ptr<ev::Object> object1 = std::make_shared<ev::Object>(1);
+	std::shared_ptr<ev::Object> object2 = std::make_shared<ev::Object>(2);
 
-	evt::EventDispatcher eventDispatcher;
-	evt::EventHandlerRegistry eventHandlerRegistry(eventDispatcher);
+	ev::EventDispatcher eventDispatcher;
+	ev::EventHandlerRegistry eventHandlerRegistry(eventDispatcher);
 
 
 	eventHandlerRegistry.registerEventHandler(
 		object1,
 		EventType_A,
-		std::bind(&evt::Object::eventHandler_A, object1, std::placeholders::_1)
+		std::bind(&ev::Object::eventHandler_A, object1, std::placeholders::_1)
 	);
 	eventHandlerRegistry.registerEventHandler(
 		object1,
 		EventType_B,
-		std::bind(&evt::Object::eventHandler_B, object1, std::placeholders::_1)
+		std::bind(&ev::Object::eventHandler_B, object1, std::placeholders::_1)
 	);
 
 	eventHandlerRegistry.registerEventHandler(
 		object2,
 		EventType_A,
-		std::bind(&evt::Object::eventHandler_A, object2, std::placeholders::_1)
+		std::bind(&ev::Object::eventHandler_A, object2, std::placeholders::_1)
 	);
 	eventHandlerRegistry.registerEventHandler(
 		object2,
 		EventType_B,
-		std::bind(&evt::Object::eventHandler_B, object2, std::placeholders::_1)
+		std::bind(&ev::Object::eventHandler_B, object2, std::placeholders::_1)
 	);
 	eventHandlerRegistry.registerEventHandler(
 		object2,
 		EventType_C,
-		std::bind(&evt::Object::eventHandler_C, object2, std::placeholders::_1)
+		std::bind(&ev::Object::eventHandler_C, object2, std::placeholders::_1)
 	);
 
-	eventDispatcher.notifyEvent(object1, EventType_A, std::make_shared<evt::ObjectEventData>(101));
-	eventDispatcher.notifyEvent(object1, EventType_B, std::make_shared<evt::ObjectEventData>(102));
-	eventDispatcher.notifyEvent(object2, EventType_A, std::make_shared<evt::ObjectEventData>(103));
-	eventDispatcher.notifyEvent(object2, EventType_B, std::make_shared<evt::ObjectEventData>(104));
+	eventDispatcher.notifyEvent(object1, EventType_A, std::make_shared<ev::ObjectEventData>(101));
+	eventDispatcher.notifyEvent(object1, EventType_B, std::make_shared<ev::ObjectEventData>(102));
+	eventDispatcher.notifyEvent(object2, EventType_A, std::make_shared<ev::ObjectEventData>(103));
+	eventDispatcher.notifyEvent(object2, EventType_B, std::make_shared<ev::ObjectEventData>(104));
 
 
 	eventHandlerRegistry.unregisterEventHandler(object1);
 
 
-	eventDispatcher.notifyEvent(object1, EventType_B, std::make_shared<evt::ObjectEventData>(105));
-	eventDispatcher.notifyEvent(object2, EventType_B, std::make_shared<evt::ObjectEventData>(106));
+	eventDispatcher.notifyEvent(object1, EventType_B, std::make_shared<ev::ObjectEventData>(105));
+	eventDispatcher.notifyEvent(object2, EventType_B, std::make_shared<ev::ObjectEventData>(106));
 	eventDispatcher.notifyEvent(object2, EventType_C, nullptr);
-	eventDispatcher.notifyEvent(object2, EventType_C, std::make_shared<evt::ObjectEventData>(107));
+	eventDispatcher.notifyEvent(object2, EventType_C, std::make_shared<ev::ObjectEventData>(107));
 }
 
 /////////////////////////////////////////////////////////////////////////////
 //===========================================================================
 void test2(void)
 {
-	const evt::EventType EventType_A = 1;
-	const evt::EventType EventType_B = 2;
+	const ev::EventType EventType_A = 1;
+	const ev::EventType EventType_B = 2;
 
-	std::shared_ptr<evt::Object> object1 = std::make_shared<evt::Object>(3);
-	std::shared_ptr<evt::Object> object2 = std::make_shared<evt::Object>(4);
+	std::shared_ptr<ev::Object> object1 = std::make_shared<ev::Object>(3);
+	std::shared_ptr<ev::Object> object2 = std::make_shared<ev::Object>(4);
 
-	evt::keyed::EventListener eventListener;
+	ev::key::EventListener eventListener;
 
 	eventListener.attach(
 		object1.get(),
-		std::bind(&evt::Object::eventHandler_A, object1, std::placeholders::_1)
+		std::bind(&ev::Object::eventHandler_A, object1, std::placeholders::_1)
 	);
 	eventListener.attach(
 		object1.get(),
-		std::bind(&evt::Object::eventHandler_B, object1, std::placeholders::_1)
+		std::bind(&ev::Object::eventHandler_B, object1, std::placeholders::_1)
 	);
 	eventListener.attach(
 		object2.get(),
-		std::bind(&evt::Object::eventHandler_A, object2, std::placeholders::_1)
+		std::bind(&ev::Object::eventHandler_A, object2, std::placeholders::_1)
 	);
 	eventListener.attach(
 		object2.get(),
-		std::bind(&evt::Object::eventHandler_B, object2, std::placeholders::_1)
+		std::bind(&ev::Object::eventHandler_B, object2, std::placeholders::_1)
 	);
 
-	std::shared_ptr<evt::EventData> eventData = std::make_shared<evt::ObjectEventData>(211);
-	evt::Event event_A{ EventType_A, eventData };
+	std::shared_ptr<ev::EventData> eventData = std::make_shared<ev::ObjectEventData>(211);
+	ev::Event event_A{ EventType_A, eventData };
 	eventListener.notify(event_A);
 
-	eventListener.notify(EventType_B, std::make_shared<evt::ObjectEventData>(212));
+	eventListener.notify(EventType_B, std::make_shared<ev::ObjectEventData>(212));
 
 	eventListener.detach(object1.get());
-	eventListener.notify(EventType_A, std::make_shared<evt::ObjectEventData>(213));
-	eventListener.notify(EventType_B, std::make_shared<evt::ObjectEventData>(214));
+	eventListener.notify(EventType_A, std::make_shared<ev::ObjectEventData>(213));
+	eventListener.notify(EventType_B, std::make_shared<ev::ObjectEventData>(214));
 }
 
 /////////////////////////////////////////////////////////////////////////////
 //===========================================================================
 void test3(void)
 {
-	const evt::EventType EventType_A = 1;
-	const evt::EventType EventType_B = 2;
-	const evt::EventType EventType_C = 3;
+	const ev::EventType EventType_A = 1;
+	const ev::EventType EventType_B = 2;
+	const ev::EventType EventType_C = 3;
 
-	std::shared_ptr<evt::Object> object1 = std::make_shared<evt::Object>(1);
-	std::shared_ptr<evt::Object> object2 = std::make_shared<evt::Object>(2);
+	std::shared_ptr<ev::Object> object1 = std::make_shared<ev::Object>(1);
+	std::shared_ptr<ev::Object> object2 = std::make_shared<ev::Object>(2);
 
-	evt::keyed::EventDispatcher eventDispatcher;
-	evt::keyed::EventHandlerRegistry eventHandlerRegistry(eventDispatcher);
+	ev::key::EventDispatcher eventDispatcher;
+	ev::key::EventHandlerRegistry eventHandlerRegistry(eventDispatcher);
 
 
 	eventHandlerRegistry.registerEventHandler(
 		object1.get(),
 		EventType_A,
-		std::bind(&evt::Object::eventHandler_A, object1, std::placeholders::_1)
+		std::bind(&ev::Object::eventHandler_A, object1, std::placeholders::_1)
 	);
 	eventHandlerRegistry.registerEventHandler(
 		object1.get(),
 		EventType_B,
-		std::bind(&evt::Object::eventHandler_B, object1, std::placeholders::_1)
+		std::bind(&ev::Object::eventHandler_B, object1, std::placeholders::_1)
 	);
 
 	eventHandlerRegistry.registerEventHandler(
 		object2.get(),
 		EventType_A,
-		std::bind(&evt::Object::eventHandler_A, object2, std::placeholders::_1)
+		std::bind(&ev::Object::eventHandler_A, object2, std::placeholders::_1)
 	);
 	eventHandlerRegistry.registerEventHandler(
 		object2.get(),
 		EventType_B,
-		std::bind(&evt::Object::eventHandler_B, object2, std::placeholders::_1)
+		std::bind(&ev::Object::eventHandler_B, object2, std::placeholders::_1)
 	);
 	eventHandlerRegistry.registerEventHandler(
 		object2.get(),
 		EventType_C,
-		std::bind(&evt::Object::eventHandler_C, object2, std::placeholders::_1)
+		std::bind(&ev::Object::eventHandler_C, object2, std::placeholders::_1)
 	);
 
-	eventDispatcher.notifyEvent(EventType_A, std::make_shared<evt::ObjectEventData>(101));
-	eventDispatcher.notifyEvent(EventType_B, std::make_shared<evt::ObjectEventData>(102));
-	eventDispatcher.notifyEvent(EventType_A, std::make_shared<evt::ObjectEventData>(103));
-	eventDispatcher.notifyEvent(EventType_B, std::make_shared<evt::ObjectEventData>(104));
+	eventDispatcher.notifyEvent(EventType_A, std::make_shared<ev::ObjectEventData>(101));
+	eventDispatcher.notifyEvent(EventType_B, std::make_shared<ev::ObjectEventData>(102));
+	eventDispatcher.notifyEvent(EventType_A, std::make_shared<ev::ObjectEventData>(103));
+	eventDispatcher.notifyEvent(EventType_B, std::make_shared<ev::ObjectEventData>(104));
 
 
 	eventHandlerRegistry.unregisterEventHandler(object1.get());
 
 
-	eventDispatcher.notifyEvent(EventType_B, std::make_shared<evt::ObjectEventData>(105));
-	eventDispatcher.notifyEvent(EventType_B, std::make_shared<evt::ObjectEventData>(106));
+	eventDispatcher.notifyEvent(EventType_B, std::make_shared<ev::ObjectEventData>(105));
+	eventDispatcher.notifyEvent(EventType_B, std::make_shared<ev::ObjectEventData>(106));
 	eventDispatcher.notifyEvent(EventType_C, nullptr);
-	eventDispatcher.notifyEvent(EventType_C, std::make_shared<evt::ObjectEventData>(107));
+	eventDispatcher.notifyEvent(EventType_C, std::make_shared<ev::ObjectEventData>(107));
 }
 
 /////////////////////////////////////////////////////////////////////////////

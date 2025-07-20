@@ -1,13 +1,19 @@
-﻿/////////////////////////////////////////////////////////////////////////////
+﻿#pragma once
+
+/////////////////////////////////////////////////////////////////////////////
 //===========================================================================
-namespace ev
+namespace cx::ev
 {
 	using EventType = std::int32_t;
 }
 
+
+
+
+
 /////////////////////////////////////////////////////////////////////////////
 //===========================================================================
-namespace ev
+namespace cx::ev
 {
 	class EventData : public std::enable_shared_from_this<EventData>
 	{
@@ -16,9 +22,13 @@ namespace ev
 	};
 }
 
+
+
+
+
 /////////////////////////////////////////////////////////////////////////////
 //===========================================================================
-namespace ev
+namespace cx::ev
 {
 	class Event
 	{
@@ -48,34 +58,19 @@ namespace ev
 	{
 		return std::dynamic_pointer_cast<T>(_EventData);
 	}
-
-	Event::Event(EventType const eventType, std::shared_ptr<EventData>& eventData) :
-		_Handled(false), 
-		_EventType(eventType), 
-		_EventData(eventData)
-	{
-	}
-	EventType Event::eventType() const
-	{
-		return _EventType;
-	}
-	std::shared_ptr<EventData> Event::eventData() const
-	{
-		return _EventData;
-	}
-	bool Event::handled() const
-	{
-		return _Handled;
-	}
-	void Event::handled(bool const handled)
-	{
-		_Handled = handled;
-	}
 }
+
+
+
+
 
 /////////////////////////////////////////////////////////////////////////////
 //===========================================================================
-namespace ev
+namespace cx::ev
 {
 	using EventHandler = std::function<void(Event&)>;
 }
+
+
+
+

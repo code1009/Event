@@ -19,12 +19,17 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ev\cx-ev-core.cpp" />
+    <ClCompile Include="ev\cx-ev-key.cpp" />
+    <ClCompile Include="ev\cx-ev-target.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ev-target.hpp" />
-    <ClInclude Include="ev-key.hpp" />
-    <ClInclude Include="ev.hpp" />
+    <ClInclude Include="ev\cx-ev-core.hpp" />
+    <ClInclude Include="ev\cx-ev-key.hpp" />
+    <ClInclude Include="ev\cx-ev-target.hpp" />
+    <ClInclude Include="ev\cx-ev.hpp" />
+    <ClInclude Include="ev\pch.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
@@ -112,6 +117,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
+      <AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

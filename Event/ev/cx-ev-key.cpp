@@ -1,31 +1,17 @@
 ﻿/////////////////////////////////////////////////////////////////////////////
 //===========================================================================
-namespace ev::key
+#include "pch.hpp"
+
+#include <ev/cx-ev.hpp>
+
+
+
+
+
+/////////////////////////////////////////////////////////////////////////////
+//===========================================================================
+namespace cx::ev::key
 {
-//	using Key = void*;
-	using Key = std::uintptr_t;
-}
-
-namespace ev::key
-{
-	class EventListener
-	{
-	private:
-		std::unordered_map<Key, EventHandler> _EventHandlers;
-
-	public:
-		void attach(Key const& key, EventHandler const& eventHandler);
-		void detach(Key const& key);
-
-	public:
-		void clear();
-		bool empty() const;
-
-	public:
-		void notify(Event& event);
-		void notify(EventType const eventType, std::shared_ptr<EventData> eventData);
-	};
-
 	void EventListener::attach(Key const& key, EventHandler const& eventHandler)
 	{
 		_EventHandlers[key] = eventHandler;
@@ -60,29 +46,14 @@ namespace ev::key
 	}
 }
 
+
+
+
+
 /////////////////////////////////////////////////////////////////////////////
 //===========================================================================
-namespace ev::key
+namespace cx::ev::key
 {
-	class EventDispatcher
-	{
-	private:
-		std::map<EventType, std::shared_ptr<EventListener>> _EventListenerMap;
-
-	public:
-		void registerEventListener(EventType const eventType, std::shared_ptr<EventListener> eventListener);
-		void unregisterEventListener(EventType const eventType);
-		void unregisterEventHandler(Key const key);
-		std::shared_ptr<EventListener> getEventListener(EventType const eventType);
-
-	protected:
-		void dispatchEvent(EventType const eventType, Event& event);
-
-	public:
-		void notifyEvent(EventType const eventType, Event& event);
-		void notifyEvent(EventType const eventType, std::shared_ptr<EventData> eventData);
-	};
-
 	void EventDispatcher::registerEventListener(EventType const eventType, std::shared_ptr<EventListener> eventListener)
 	{
 		_EventListenerMap[eventType] = eventListener;
@@ -121,7 +92,6 @@ namespace ev::key
 	}
 	void EventDispatcher::dispatchEvent(EventType const eventType, Event& event)
 	{
-		// 큐형태로 처리 가능 함
 		auto eventListener = getEventListener(eventType);
 		if (eventListener)
 		{
@@ -139,27 +109,14 @@ namespace ev::key
 	}
 }
 
+
+
+
+
 /////////////////////////////////////////////////////////////////////////////
 //===========================================================================
-namespace ev::key
+namespace cx::ev::key
 {
-	class EventHandlerRegistry
-	{
-	private:
-		EventDispatcher& _EventDispatcher;
-
-	public:
-		explicit EventHandlerRegistry(EventDispatcher& eventDispatcher);
-
-	public:
-		void registerEventHandler(
-			EventType const eventType,
-			Key const key,
-			EventHandler const& eventHandler
-		);
-		void unregisterEventHandler(Key const key);
-	};
-
 	EventHandlerRegistry::EventHandlerRegistry(EventDispatcher& eventDispatcher) :
 		_EventDispatcher(eventDispatcher)
 	{
@@ -183,3 +140,7 @@ namespace ev::key
 		_EventDispatcher.unregisterEventHandler(key);
 	}
 }
+
+
+
+
